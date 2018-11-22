@@ -19,9 +19,15 @@ int main()
         if(strcmp(inp, "add_edge") == 0)
         {
             char from[51], to[51];
-            int w;
-            scanf("%s %s %d", from, to, &w);
+            int w = 1;
+            if( graph->weighted )
+                scanf("%s %s %d", from, to, &w);
+            else
+                scanf("%s %s", from, to);
+
             g_add_edge(graph, from, to, w);
+            if( !graph->directed )
+                g_add_edge(graph, to, from, w);
         }else if(strcmp(inp, "display") == 0)
         {
             g_display(graph);
@@ -60,6 +66,17 @@ int main()
             scanf("%s", file );
             g_load(graph, file);
         }
+        else if( strcmp(inp, "+w") == 0 )
+            graph->weighted = true;
+        else if( strcmp(inp, "-w") == 0 )
+            graph->weighted = false;
+        else if( strcmp(inp, "+d") == 0 )
+            graph->directed = true;
+        else if( strcmp(inp, "-d") == 0 )
+            graph->directed = false;
+        else if( strcmp(inp, "prop") == 0 )
+            g_display_properties(graph);
+
     }
 
     return 0;

@@ -66,23 +66,27 @@ void g_display(Graph *graph)
 void g_remove_edge(Graph *graph, const char *from, const char *to)
 {
     List *from_nod = ht_get(graph->graph, from);
-    //List *to_nod = ht_get(graph->graph, to);
+
 
     for(L_item *it = from_nod->front; it != NULL; it = it->next)
         if(strcmp(((Edge *) it->value)->node, to) == 0)
         {
             l_delete(from_nod, it);
+
+            --graph->edges;
             break;
         }
 
-    /*/
-for( L_item *it = to_nod->front; it != NULL; it = it->next )
-    if( strcmp(((Edge*)it->value)->node, from ) == 0 )
-    {
-        l_delete( to_nod, it );
-        break;
-    }
-//*/
+    if(graph->directed)
+        return;
+
+    List *to_nod = ht_get(graph->graph, to);
+    for(L_item *it = to_nod->front; it != NULL; it = it->next)
+        if(strcmp(((Edge *) it->value)->node, from) == 0)
+        {
+            l_delete(to_nod, it);
+            break;
+        }
 }
 
 void g_remove_node(Graph *graph, const char *nod)
@@ -96,7 +100,10 @@ void g_remove_node(Graph *graph, const char *nod)
         List *to_nod = ht_get(graph->graph, ((Edge *) it->value)->node);
         for(L_item *it2 = to_nod->front; it2 != NULL; it2 = it2->next)
             if(strcmp(((Edge *) it2->value)->node, nod) == 0)
+            {
                 l_delete(to_nod, it2);
+                --graph->nodes;
+            }
     }
 }
 
@@ -114,7 +121,7 @@ static int *copy_int(int x)
     return p;
 }
 
-static void g_gfs(Graph *graph, const char *start, void (*push_f)(List*, void *))
+static void g_gfs(Graph *graph, const char *start, void (*push_f)(List *, void *))
 {
     Hashtable *bfs = ht_create(free);
 
@@ -128,11 +135,11 @@ static void g_gfs(Graph *graph, const char *start, void (*push_f)(List*, void *)
         char *nod = copy_string(q->front->value);
         l_pop_front(q);
 
-        printf("%s ", nod );
+        printf("%s ", nod);
 
         for(L_item *it = ((List *) ht_get(graph->graph, nod))->front; it != NULL; it = it->next)
         {
-            char *nnod = copy_string(((Edge*)it->value)->node);
+            char *nnod = copy_string(((Edge *) it->value)->node);
             if(ht_get(bfs, nnod) == NULL)
             {
                 ht_insert(bfs, nnod, copy_int(*(int *) ht_get(bfs, nod) + 1));
@@ -157,12 +164,12 @@ static void g_gfs(Graph *graph, const char *start, void (*push_f)(List*, void *)
 
 void g_bfs(Graph *graph, const char *start)
 {
-    g_gfs( graph, start, l_push_back );
+    g_gfs(graph, start, l_push_back);
 }
 
 void g_dfs(Graph *graph, const char *start)
 {
-    g_gfs( graph, start, l_push_front );
+    g_gfs(graph, start, l_push_front);
 }
 
 
@@ -179,21 +186,51 @@ void g_free(Graph *graph)
 
 void g_load(Graph *graph, const char *filename)
 {
-    FILE* fin = fopen(filename, "r");
+    FILE *fin = fopen(filename, "r");
+
+    char weighted, directed;
+
+    fscanf(fin, "%cw %cd", &weighted, &directed);
+
+    if(weighted == '+') graph->weighted = true;
+    if(weighted == '-') graph->weighted = false;
+    if(directed == '+') graph->weighted = true;
+    if(directed == '-') graph->weighted = false;
+
 
     int n, m;
-    fscanf(fin, "%d %d", &n, &m );
+    fscanf(fin, "%d %d", &n, &m);
 
-    for( int i = 0; i < m; ++i )
+    for(int i = 0; i < m; ++i)
     {
         char from[51], to[51];
-        int w;
-        fscanf(fin,"%s %s %d", from, to, &w );
+        int w = 1;
 
-        g_add_edge(graph, from, to, w );
+        if(graph->weighted)
+            fscanf(fin, "%s %s %d", from, to, &w);
+        else
+            fscanf(fin, "%s %s", from, to);
+
+        g_add_edge(graph, from, to, w);
+        if(!graph->directed)
+            g_add_edge(graph, to, from, w);
     }
 
     fclose(fin);
+}
+
+void g_display_properties(Graph *graph)
+{
+    printf("== Graph properties ==\n");
+    printf("Nodes: %d\n", graph->nodes);
+    printf("Edges: %d\n", graph->edges);
+
+    if(!graph->weighted) printf("not ");
+    printf("weighted\n");
+    if(!graph->directed) printf("not ");
+    printf("directed\n");
+
+    printf("======================\n");
 }
 
 
