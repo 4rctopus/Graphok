@@ -114,7 +114,7 @@ static int *copy_int(int x)
     return p;
 }
 
-void g_bfs(Graph *graph, const char *start)
+static void g_gfs(Graph *graph, const char *start, void (*push_f)(List*, void *))
 {
     Hashtable *bfs = ht_create(free);
 
@@ -127,6 +127,9 @@ void g_bfs(Graph *graph, const char *start)
     {
         char *nod = copy_string(q->front->value);
         l_pop_front(q);
+
+        printf("%s ", nod );
+
         for(L_item *it = ((List *) ht_get(graph->graph, nod))->front; it != NULL; it = it->next)
         {
             char *nnod = copy_string(((Edge*)it->value)->node);
@@ -134,18 +137,32 @@ void g_bfs(Graph *graph, const char *start)
             {
                 ht_insert(bfs, nnod, copy_int(*(int *) ht_get(bfs, nod) + 1));
 
-                l_push_back(q, copy_string(nnod));
+                push_f(q, copy_string(nnod));
             }
             free(nnod);
         }
         free(nod);
     }
 
+    /*/
     for(Ht_iterator it = ht_begin(bfs); it.ht_item != NULL; it = ht_next(bfs, it))
         printf("%s: %d\n", it.ht_item->key, *(int *)it.ht_item->value - 1 );
+    //*/
+
+    printf("\n");
 
     ht_free(bfs);
     l_free(q);
+}
+
+void g_bfs(Graph *graph, const char *start)
+{
+    g_gfs( graph, start, l_push_back );
+}
+
+void g_dfs(Graph *graph, const char *start)
+{
+    g_gfs( graph, start, l_push_front );
 }
 
 
@@ -179,8 +196,5 @@ void g_load(Graph *graph, const char *filename)
     fclose(fin);
 }
 
-void g_dfs(Graph *graph, const char *start)
-{
 
-}
 
