@@ -267,5 +267,88 @@ void g_display_properties(Graph *graph)
     printf("======================\n");
 }
 
+void g_bellman_ford(Graph *graph, const char *start)
+{
+    // distance from start point
+    Hashtable *dist = ht_create(free);
+
+    // counts the number of times we use an edge
+    Hashtable *nr = ht_create(l_free);
+    for(Ht_iterator it = ht_begin(graph->graph); it.ht_item != NULL; it = ht_next(graph->graph, it))
+    {
+        List *node = l_create(free);
+        for(L_item *it2 = ((List *) it.ht_item->value)->front; it2 != NULL; it2 = it2->next)
+            l_push_back(node, copy_int(0));
+        ht_insert(nr, it.ht_item->key, node);
+
+        ht_insert(dist, it.ht_item->key, copy_int(INT_MAX));
+    }
+
+
+    // bfs queue, start node
+    List *q = l_create(free);
+    l_push_back(q, copy_string(start));
+    ht_insert(dist, start, copy_int(1));
+
+
+    while(!l_is_empty(q))
+    {
+        char *nod = copy_string(q->front->value);
+        l_pop_front(q);
+
+
+        L_item *it_nr = ((List *) ht_get(nr, nod))->front;
+        for(L_item *it = ((List *) ht_get(graph->graph, nod))->front; it != NULL; it = it->next, it_nr = it_nr->next)
+        {
+            char *nnod = copy_string(((Edge *) it->value)->node);
+            int cost = ((Edge *) it->value)->weigth;
+            if(*(int *) ht_get(dist, nod) + cost < *(int *) ht_get(dist, nnod))
+            {
+                // dist[nnod] = dist[nod] + cost;
+                ht_insert(dist, nnod, copy_int(*(int *) ht_get(dist, nod) + cost));
+
+                l_push_back(q, copy_string(nnod));
+
+                /*/
+                ++nr[nod][j];
+                if( nr[nod][j] > N - 1 )
+                {
+                    fout << "Ciclu negativ!";
+                    return 0;
+                }
+                //*/
+
+                ++(*(int *) it_nr->value);
+                if(*(int *) it_nr->value > graph->nodes - 1)
+                {
+                    printf("Negative cycle!");
+
+                    ht_free(nr);
+                    ht_free(dist);
+                    l_free(q);
+                    free(nnod);
+                    free(nod);
+                    return;
+                }
+            }
+            free(nnod);
+        }
+        free(nod);
+    }
+
+
+    for(Ht_iterator it = ht_begin(dist); it.ht_item != NULL; it = ht_next(dist, it))
+        printf("%s: %d\n", it.ht_item->key, *(int *) it.ht_item->value - 1);
+
+
+    printf("\n");
+
+    ht_free(nr);
+    ht_free(dist);
+    l_free(q);
+}
+
+
+
 
 

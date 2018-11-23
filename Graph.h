@@ -39,6 +39,8 @@ void g_bfs(Graph *graph, const char *start);
 
 void g_dfs(Graph *graph, const char *start);
 
+void g_bellman_ford(Graph *graph, const char *start);
+
 void g_clear(Graph *graph);
 
 void g_free(Graph *graph);
