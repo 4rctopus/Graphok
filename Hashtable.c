@@ -2,6 +2,11 @@
 // Created by ARCTOPUS on 11/4/2018.
 //
 
+/*/
+#define HASZNALOM_A_MALLOC_FREE_POINTERET true
+#include "debugmalloc/debugmalloc.h"
+//*/
+
 #include "Hashtable.h"
 
 

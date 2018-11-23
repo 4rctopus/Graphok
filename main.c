@@ -7,6 +7,11 @@
 #include "Hashtable.h"
 #include "Graph.h"
 
+/*/
+#define HASZNALOM_A_MALLOC_FREE_POINTERET true
+#include "debugmalloc/debugmalloc.h"
+//*/
+
 
 int main()
 {
@@ -78,6 +83,10 @@ int main()
             g_display_properties(graph);
 
     }
+
+    g_free(graph);
+
+    //debugmalloc_dump();
 
     return 0;
 }
