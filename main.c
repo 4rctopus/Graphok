@@ -26,62 +26,96 @@ int main()
         {
             char from[51], to[51];
             int w = 1;
-            if( graph->weighted )
+            if(graph->weighted)
                 scanf("%s %s %d", from, to, &w);
             else
                 scanf("%s %s", from, to);
 
             g_add_edge(graph, from, to, w);
-            if( !graph->directed )
+            if(!graph->directed)
                 g_add_edge(graph, to, from, w);
-        }else if(strcmp(inp, "display") == 0)
+        }
+        else if(strcmp(inp, "display") == 0)
         {
             g_display(graph);
-        }else if(strcmp(inp, "remove_edge") == 0)
+        }
+        else if(strcmp(inp, "remove_edge") == 0)
         {
             char from[51], to[51];
             scanf("%s %s", from, to);
             g_remove_edge(graph, from, to);
-        }else if(strcmp(inp, "remove_node") == 0)
+        }
+        else if(strcmp(inp, "remove_node") == 0)
         {
             char nod[51];
             scanf("%s", nod);
             g_remove_node(graph, nod);
         }
-        else if( strcmp(inp, "add_node") == 0 )
+        else if(strcmp(inp, "add_node") == 0)
         {
             char nod[51];
-            scanf("%s", nod );
-            g_add_node(graph, nod );
+            scanf("%s", nod);
+            g_add_node(graph, nod);
         }
-        else if( strcmp(inp, "bfs" ) == 0 )
+        else if(strcmp(inp, "bfs") == 0)
         {
             char nod[51];
-            scanf("%s", nod );
-            g_bfs(graph, nod );
+            scanf("%s", nod);
+            g_bfs(graph, nod);
         }
-        else if( strcmp( inp, "dfs" ) == 0 )
+        else if(strcmp(inp, "dfs") == 0)
         {
             char nod[51];
-            scanf("%s", nod );
-            g_dfs(graph, nod );
+            scanf("%s", nod);
+            g_dfs(graph, nod);
         }
-        else if( strcmp( inp, "load" ) == 0 )
+        else if( strcmp(inp, "bell") == 0 )
+        {
+            char nod[51];
+            scanf("%s", nod);
+            g_bellman_ford(graph, nod);
+        }
+        else if(strcmp(inp, "load") == 0)
         {
             char file[51];
-            scanf("%s", file );
-            g_load(graph, file);
+            scanf("%s", file);
+
+            printf("Do you wish to proceed, if you do, your current graph will be lost? (Y/N)\n");
+            char yn = '0';
+            while(tolower(yn) != 'y' && tolower(yn) != 'n')
+            {
+                scanf("%c", &yn);
+                if(tolower(yn) == 'y')
+                {
+                    if( g_load(graph, file) )
+                        printf("Loaded graph from '%s'\n", file);
+                    else
+                        printf("Failed to load graph from '%s'\n", file );
+                }
+            }
         }
-        else if( strcmp(inp, "+w") == 0 )
+        else if( strcmp(inp, "save") == 0 )
+        {
+            char file[51];
+            scanf("%s", file);
+
+            if( g_save(graph, file) )
+                printf("Saved graph to '%s'\n", file);
+            else
+                printf("Failed to save graph to '%s'\n", file );
+        }
+        else if(strcmp(inp, "+w") == 0)
             graph->weighted = true;
-        else if( strcmp(inp, "-w") == 0 )
+        else if(strcmp(inp, "-w") == 0)
             graph->weighted = false;
-        else if( strcmp(inp, "+d") == 0 )
+        else if(strcmp(inp, "+d") == 0)
             graph->directed = true;
-        else if( strcmp(inp, "-d") == 0 )
+        else if(strcmp(inp, "-d") == 0)
             graph->directed = false;
-        else if( strcmp(inp, "prop") == 0 )
+        else if(strcmp(inp, "prop") == 0)
             g_display_properties(graph);
+        else if(strcmp(inp, "exit") != 0)
+            printf("\'%s\' is not recognized as a command.\n", inp);
 
     }
 
