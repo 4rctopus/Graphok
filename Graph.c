@@ -14,7 +14,7 @@
 Graph *g_create()
 {
     Graph *graph = malloc(sizeof(Graph));
-    graph->graph = ht_create(free);
+    graph->graph = ht_create(l_free);
     graph->directed = graph->weighted = true;
     graph->nodes = 0;
     graph->edges = 0;
@@ -33,21 +33,9 @@ void g_add_node(Graph *graph, const char *nod)
 
 void g_add_edge(Graph *graph, const char *from, const char *to, int weight)
 {
-    if(ht_get(graph->graph, from) == NULL)
-    {
-        List *new_list = l_create(free);
-        ht_insert(graph->graph, from, new_list);
-
-        ++graph->nodes;
-    }
-
-    if(ht_get(graph->graph, to) == NULL)
-    {
-        List *new_list = l_create(free);
-        ht_insert(graph->graph, to, new_list);
-
-        ++graph->nodes;
-    }
+    // create the nodes in case they don't exist already
+    g_add_node(graph, from);
+    g_add_node(graph, to);
 
     Edge *new_edge = malloc(sizeof(Edge));
     strcpy(new_edge->node, to);
@@ -72,7 +60,7 @@ void g_remove_edge(Graph *graph, const char *from, const char *to)
 {
     List *from_nod = ht_get(graph->graph, from);
 
-
+    // delete first edge from -> to
     for(L_item *it = from_nod->front; it != NULL; it = it->next)
         if(strcmp(((Edge *) it->value)->node, to) == 0)
         {
@@ -82,9 +70,11 @@ void g_remove_edge(Graph *graph, const char *from, const char *to)
             break;
         }
 
+    // if the graph is directed we don't have to remove the reverse edge
     if(graph->directed)
         return;
 
+    // delete first edge to -> from
     List *to_nod = ht_get(graph->graph, to);
     for(L_item *it = to_nod->front; it != NULL; it = it->next)
         if(strcmp(((Edge *) it->value)->node, from) == 0)
