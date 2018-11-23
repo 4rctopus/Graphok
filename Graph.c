@@ -179,9 +179,14 @@ void g_free(Graph *graph)
     free(graph);
 }
 
-void g_load(Graph *graph, const char *filename)
+bool g_load(Graph *graph, const char *filename)
 {
+    g_clear(graph);
+
     FILE *fin = fopen(filename, "r");
+
+    if(fin == NULL)
+        return false;
 
     char weighted, directed;
 
@@ -189,8 +194,8 @@ void g_load(Graph *graph, const char *filename)
 
     if(weighted == '+') graph->weighted = true;
     if(weighted == '-') graph->weighted = false;
-    if(directed == '+') graph->weighted = true;
-    if(directed == '-') graph->weighted = false;
+    if(directed == '+') graph->directed = true;
+    if(directed == '-') graph->directed = false;
 
 
     int n, m;
@@ -212,6 +217,40 @@ void g_load(Graph *graph, const char *filename)
     }
 
     fclose(fin);
+    return true;
+}
+
+bool g_save(Graph *graph, const char *filename)
+{
+    FILE *fout = fopen(filename, "w");
+
+    if(fout == NULL)
+        return false;
+
+    char weighted = '+', directed = '+';
+    if(!graph->weighted) weighted = '-';
+    if(!graph->directed) directed = '-';
+
+    fprintf(fout, "%cw %cd\n", weighted, directed);
+
+    fprintf(fout, "%d %d\n", graph->nodes, graph->edges);
+
+    for(Ht_iterator it = ht_begin(graph->graph); it.ht_item != NULL; it = ht_next(graph->graph, it))
+    {
+        for(L_item *it2 = ((List *) it.ht_item->value)->front; it2 != NULL; it2 = it2->next)
+        {
+            fprintf(fout, "%s ", it.ht_item->key);
+
+            fprintf(fout, "%s", ((Edge *) it2->value)->node);
+            if(graph->weighted)
+                fprintf(fout, " %d", ((Edge *) it2->value)->weigth);
+            fprintf(fout, "\n");
+        }
+    }
+
+    fclose(fout);
+
+    return true;
 }
 
 void g_display_properties(Graph *graph)

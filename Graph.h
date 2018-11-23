@@ -43,7 +43,9 @@ void g_clear(Graph *graph);
 
 void g_free(Graph *graph);
 
-void g_load(Graph *graph, const char *filename );
+bool g_load(Graph *graph, const char *filename );
+
+bool g_save(Graph *graph, const char *filename );
 
 
 #endif //PROGNHF_GRAPH_H
