@@ -12,7 +12,8 @@
 
 const int PRIME1 = 151;
 
-const int INITIAL_SIZE = 104281;
+//const int INITIAL_SIZE = 104281;
+const int INITIAL_SIZE = 15;
 
 
 Hashtable *ht_create(void (*f)(void *))

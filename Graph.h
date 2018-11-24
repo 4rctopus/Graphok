@@ -29,7 +29,7 @@ void g_add_edge(Graph *graph, const char *from, const char *to, int weight);
 
 void g_display(Graph *graph);
 
-void g_display_properties( Graph *graph );
+void g_display_properties(Graph *graph);
 
 void g_remove_node(Graph *graph, const char *nod);
 
@@ -41,13 +41,17 @@ void g_dfs(Graph *graph, const char *start);
 
 void g_bellman_ford(Graph *graph, const char *start);
 
+void g_dijkstra(Graph *graph, const char *start);
+
+void g_mst(Graph *graph, const char *maxmin);
+
 void g_clear(Graph *graph);
 
 void g_free(Graph *graph);
 
-bool g_load(Graph *graph, const char *filename );
+bool g_load(Graph *graph, const char *filename);
 
-bool g_save(Graph *graph, const char *filename );
+bool g_save(Graph *graph, const char *filename);
 
 
 #endif //PROGNHF_GRAPH_H

@@ -9,7 +9,7 @@
 
 #include "Graph.h"
 #include "List.h"
-
+#include "Heap.h"
 
 Graph *g_create()
 {
@@ -346,6 +346,83 @@ void g_bellman_ford(Graph *graph, const char *start)
     ht_free(nr);
     ht_free(dist);
     l_free(q);
+}
+
+typedef struct Node
+{
+    char nod[51];
+    int val;
+} Node;
+
+
+int compar( void *a, void *b )
+{
+    Node n1 = *(Node*)a;
+    Node n2 = *(Node*)b;
+
+    return n1.val - n2.val;
+}
+
+void g_dijkstra(Graph *graph, const char *start)
+{
+    Hashtable *dist = ht_create(free);
+    Hashtable *sure = ht_create(free);
+    for(Ht_iterator it = ht_begin(graph->graph); it.ht_item != NULL; it = ht_next(graph->graph, it))
+    {
+        ht_insert(dist, it.ht_item->key, copy_int(INT_MAX));
+        ht_insert(sure, it.ht_item->key, copy_int(0));
+    }
+
+    // dist[ST] = 1;
+    ht_insert( dist, start, copy_int(1) );
+
+    /*
+    priority_queue< nodS, vector< nodS >, comparC > qu;
+    nodS STnod = { ST, dist[ST] };
+    qu.push( STnod );
+     */
+    Heap *qu = h_create( graph->nodes, compar);
+    Node *STnod = malloc(sizeof(Node)); strcpy( STnod->nod, start ); STnod->val = 1;
+    h_push(qu, STnod);
+
+    for( int snr = 1; snr < graph->nodes; ++snr )
+    {
+        //while( qu.size() && ( dist[qu.top().nod] != qu.top().val || sure[qu.top().nod] ) )
+          //  qu.pop();
+        while( qu->size && (*(int*)( ht_get(dist, (*(Node*)h_getmin(qu)).nod )) != (*(Node*)h_getmin(qu)).val || (*(int*)ht_get(dist, (*(Node*)h_getmin(qu)).nod ) ) ) )
+            h_pop(qu);
+
+        if( !qu->size )
+            break;
+
+        Node hnod = *(Node*)h_getmin(qu);
+        h_pop(qu);
+
+        ht_insert(sure, hnod.nod, copy_int(1) );
+
+        L_item *it = ht_get( graph->graph, hnod.nod );
+        for( ; it != NULL; it = it->next )
+        {
+            char *nnod = ((Edge *) it->value)->node;
+            int hcost = ((Edge *) it->value)->weigth;
+            if( *(int*)ht_get(dist, hnod.nod) + hcost < *(int*)ht_get(dist, nnod) )
+            {
+                ht_insert( dist, nnod, copy_int(*(int*)ht_get(dist, hnod.nod) + hcost) );
+
+                Node *nNode = malloc(sizeof(Node)); strcpy( nNode->nod, nnod ); nNode->val = *(int*)ht_get(dist, nnod);
+                h_push( qu, nNode );
+            }
+        }
+    }
+
+    for(Ht_iterator it = ht_begin(dist); it.ht_item != NULL; it = ht_next(dist, it))
+        printf("%s: %d\n", it.ht_item->key, *(int *) it.ht_item->value - 1);
+
+};
+
+void g_mst(Graph *graph, const char *maxmin)
+{
+
 }
 
 
