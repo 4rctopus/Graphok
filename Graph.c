@@ -387,9 +387,10 @@ void g_dijkstra(Graph *graph, const char *start)
 
     for( int snr = 1; snr < graph->nodes; ++snr )
     {
+
         //while( qu.size() && ( dist[qu.top().nod] != qu.top().val || sure[qu.top().nod] ) )
           //  qu.pop();
-        while( qu->size && (*(int*)( ht_get(dist, (*(Node*)h_getmin(qu)).nod )) != (*(Node*)h_getmin(qu)).val || (*(int*)ht_get(dist, (*(Node*)h_getmin(qu)).nod ) ) ) )
+        while( qu->size && (*(int*)( ht_get(dist, (*(Node*)h_getmin(qu)).nod )) != (*(Node*)h_getmin(qu)).val || (*(int*)ht_get(sure, (*(Node*)h_getmin(qu)).nod ) ) ) )
             h_pop(qu);
 
         if( !qu->size )
@@ -400,13 +401,15 @@ void g_dijkstra(Graph *graph, const char *start)
 
         ht_insert(sure, hnod.nod, copy_int(1) );
 
-        L_item *it = ht_get( graph->graph, hnod.nod );
+        L_item *it = ((List*)ht_get( graph->graph, hnod.nod ))->front;
         for( ; it != NULL; it = it->next )
         {
-            char *nnod = ((Edge *) it->value)->node;
+            char *nnod = ((Edge *) it->value)->node ;
             int hcost = ((Edge *) it->value)->weigth;
+
             if( *(int*)ht_get(dist, hnod.nod) + hcost < *(int*)ht_get(dist, nnod) )
             {
+
                 ht_insert( dist, nnod, copy_int(*(int*)ht_get(dist, hnod.nod) + hcost) );
 
                 Node *nNode = malloc(sizeof(Node)); strcpy( nNode->nod, nnod ); nNode->val = *(int*)ht_get(dist, nnod);
@@ -418,6 +421,9 @@ void g_dijkstra(Graph *graph, const char *start)
     for(Ht_iterator it = ht_begin(dist); it.ht_item != NULL; it = ht_next(dist, it))
         printf("%s: %d\n", it.ht_item->key, *(int *) it.ht_item->value - 1);
 
+    ht_free(dist);
+    ht_free(sure);
+    h_free(qu);
 };
 
 void g_mst(Graph *graph, const char *maxmin)

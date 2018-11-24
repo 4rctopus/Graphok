@@ -75,6 +75,12 @@ int main()
             scanf("%s", nod);
             g_bellman_ford(graph, nod);
         }
+        else if( strcmp( inp, "dijk") == 0 )
+        {
+            char nod[51];
+            scanf("%s", nod);
+            g_dijkstra(graph, nod);
+        }
         else if(strcmp(inp, "load") == 0)
         {
             char file[51];

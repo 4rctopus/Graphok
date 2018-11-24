@@ -5,7 +5,7 @@
 
 #include <malloc.h>
 
-//*/
+/*/
 #define HASZNALOM_A_MALLOC_FREE_POINTERET true
 #include "debugmalloc/debugmalloc.h"
 //*/
