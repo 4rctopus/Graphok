@@ -81,6 +81,12 @@ int main()
             scanf("%s", nod);
             g_dijkstra(graph, nod);
         }
+        else if( strcmp( inp, "mst") == 0 )
+        {
+            char minmax[51];
+            scanf("%s", minmax);
+            g_mst(graph, minmax);
+        }
         else if(strcmp(inp, "load") == 0)
         {
             char file[51];

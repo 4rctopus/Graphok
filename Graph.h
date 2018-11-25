@@ -43,7 +43,7 @@ void g_bellman_ford(Graph *graph, const char *start);
 
 void g_dijkstra(Graph *graph, const char *start);
 
-void g_mst(Graph *graph, const char *maxmin);
+void g_mst(Graph *graph, const char *minmax);
 
 void g_clear(Graph *graph);
 

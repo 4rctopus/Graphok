@@ -350,6 +350,7 @@ void g_bellman_ford(Graph *graph, const char *start)
 
 typedef struct Node
 {
+    char from[51];
     char nod[51];
     int val;
 } Node;
@@ -362,6 +363,17 @@ int compar( void *a, void *b )
 
     return n1.val - n2.val;
 }
+
+int compar_max( void *a, void *b )
+{
+    Node n1 = *(Node*)a;
+    Node n2 = *(Node*)b;
+
+    return n2.val - n1.val;
+}
+
+
+
 
 void g_dijkstra(Graph *graph, const char *start)
 {
@@ -381,11 +393,11 @@ void g_dijkstra(Graph *graph, const char *start)
     nodS STnod = { ST, dist[ST] };
     qu.push( STnod );
      */
-    Heap *qu = h_create( graph->nodes, compar);
+    Heap *qu = h_create( graph->nodes * 2, compar);
     Node *STnod = malloc(sizeof(Node)); strcpy( STnod->nod, start ); STnod->val = 1;
     h_push(qu, STnod);
 
-    for( int snr = 1; snr < graph->nodes; ++snr )
+    for( int snr = 0; snr < graph->nodes - 1; ++snr )
     {
 
         //while( qu.size() && ( dist[qu.top().nod] != qu.top().val || sure[qu.top().nod] ) )
@@ -426,9 +438,75 @@ void g_dijkstra(Graph *graph, const char *start)
     h_free(qu);
 };
 
-void g_mst(Graph *graph, const char *maxmin)
+void g_mst(Graph *graph, const char *minmax )
 {
+    int (*compare)(void *, void *) = compar;
+    if( strcmp(minmax, "max") == 0 )
+        compare = compar_max;
 
+
+    Graph *mst = g_create();
+    mst->directed = false;
+
+    Hashtable *sure = ht_create(free);
+
+
+    char *start = ht_begin(graph->graph).ht_item->key;
+
+
+
+    Heap *qu = h_create( graph->nodes * 2, compare);
+    Node *STnod = malloc(sizeof(Node)); strcpy( STnod->nod, start ); STnod->val = 0;
+    STnod->from[0] = 0;
+
+    h_push(qu, STnod);
+
+
+
+    for( int i = 0; i < graph->nodes && qu->size; ++i )
+    {
+        while( qu->size && ht_get(sure, ((Node*)h_getmin(qu))->nod ) != NULL )
+            h_pop(qu);
+
+
+        if( !qu->size )
+            break;
+
+        // get best edge
+        Node hnod = *(Node*)h_getmin(qu);
+        h_pop(qu);
+
+        // mark it in sure
+        ht_insert(sure, hnod.nod, copy_int(1) );
+
+        // add it to the mst graph
+        if( hnod.from[0] != 0 )
+            g_add_edge( mst, hnod.from, hnod.nod, 1 );
+
+
+        // get all the edges from it and put it in the heap
+        L_item *it = ((List*)ht_get( graph->graph, hnod.nod ))->front;
+        for( ;it != NULL; it = it->next )
+        {
+
+            char *nnod = ((Edge *) it->value)->node;
+            int hcost = ((Edge *) it->value)->weigth;
+
+
+            // if it isn't in the mst yet
+            if( ht_get(sure, nnod) == NULL )
+            {
+                Node *nNode = malloc(sizeof(Node)); strcpy( nNode->nod, nnod ); nNode->val = hcost;
+                strcpy(nNode->from ,hnod.nod );
+
+                h_push( qu, nNode );
+            }
+        }
+    }
+
+
+    g_display(mst);
+    g_free(mst);
 }
 
 
