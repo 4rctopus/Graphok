@@ -20,11 +20,8 @@ typedef struct Heap
 Heap *h_create( int capacity, int (*compare)(void *, void *));
 
 void h_push(Heap *heap, void *item);
-
 void h_pop(Heap *heap);
-
 void *h_getmin(Heap *heap);
 
 void h_clear( Heap *heap );
-
 void h_free( Heap *heap );

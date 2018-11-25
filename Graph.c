@@ -10,6 +10,7 @@
 #include "Graph.h"
 #include "List.h"
 #include "Heap.h"
+#include <limits.h>
 
 Graph *g_create()
 {
@@ -116,58 +117,6 @@ static int *copy_int(int x)
     return p;
 }
 
-static void g_gfs(Graph *graph, const char *start, void (*push_f)(List *, void *))
-{
-    Hashtable *bfs = ht_create(free);
-
-    List *q = l_create(free);
-    l_push_back(q, copy_string(start));
-    ht_insert(bfs, start, copy_int(1));
-
-
-    while(!l_is_empty(q))
-    {
-        char *nod = copy_string(q->front->value);
-        l_pop_front(q);
-
-        printf("%s ", nod);
-
-        for(L_item *it = ((List *) ht_get(graph->graph, nod))->front; it != NULL; it = it->next)
-        {
-            char *nnod = copy_string(((Edge *) it->value)->node);
-            if(ht_get(bfs, nnod) == NULL)
-            {
-                ht_insert(bfs, nnod, copy_int(*(int *) ht_get(bfs, nod) + 1));
-
-                push_f(q, copy_string(nnod));
-            }
-            free(nnod);
-        }
-        free(nod);
-    }
-
-    /*/
-    for(Ht_iterator it = ht_begin(bfs); it.ht_item != NULL; it = ht_next(bfs, it))
-        printf("%s: %d\n", it.ht_item->key, *(int *)it.ht_item->value - 1 );
-    //*/
-
-    printf("\n");
-
-    ht_free(bfs);
-    l_free(q);
-}
-
-void g_bfs(Graph *graph, const char *start)
-{
-    g_gfs(graph, start, l_push_back);
-}
-
-void g_dfs(Graph *graph, const char *start)
-{
-    g_gfs(graph, start, l_push_front);
-}
-
-
 void g_clear(Graph *graph)
 {
     ht_clear(graph->graph);
@@ -203,7 +152,7 @@ bool g_load(Graph *graph, const char *filename)
 
     for(int i = 0; i < m; ++i)
     {
-        char from[51], to[51];
+        char from[NODE_LENGTH], to[NODE_LENGTH];
         int w = 1;
 
         if(graph->weighted)
@@ -267,6 +216,52 @@ void g_display_properties(Graph *graph)
     printf("======================\n");
 }
 
+static void g_gfs(Graph *graph, const char *start, void (*push_f)(List *, void *))
+{
+    Hashtable *bfs = ht_create(free);
+
+    List *q = l_create(free);
+    l_push_back(q, copy_string(start));
+    ht_insert(bfs, start, copy_int(1));
+
+
+    while(!l_is_empty(q))
+    {
+        char *nod = copy_string(q->front->value);
+        l_pop_front(q);
+
+        printf("%s ", nod);
+
+        for(L_item *it = ((List *) ht_get(graph->graph, nod))->front; it != NULL; it = it->next)
+        {
+            char *nnod = ((Edge *) it->value)->node;
+            if(ht_get(bfs, nnod) == NULL)
+            {
+                ht_insert(bfs, nnod, copy_int(*(int *) ht_get(bfs, nod) + 1));
+
+                push_f(q, copy_string(nnod));
+            }
+        }
+        free(nod);
+    }
+
+
+    printf("\n");
+
+    ht_free(bfs);
+    l_free(q);
+}
+
+void g_bfs(Graph *graph, const char *start)
+{
+    g_gfs(graph, start, l_push_back);
+}
+
+void g_dfs(Graph *graph, const char *start)
+{
+    g_gfs(graph, start, l_push_front);
+}
+
 void g_bellman_ford(Graph *graph, const char *start)
 {
     // distance from start point
@@ -309,14 +304,6 @@ void g_bellman_ford(Graph *graph, const char *start)
 
                 l_push_back(q, copy_string(nnod));
 
-                /*/
-                ++nr[nod][j];
-                if( nr[nod][j] > N - 1 )
-                {
-                    fout << "Ciclu negativ!";
-                    return 0;
-                }
-                //*/
 
                 ++(*(int *) it_nr->value);
                 if(*(int *) it_nr->value > graph->nodes - 1)
@@ -350,13 +337,13 @@ void g_bellman_ford(Graph *graph, const char *start)
 
 typedef struct Node
 {
-    char from[51];
-    char nod[51];
+    char from[NODE_LENGTH];
+    char nod[NODE_LENGTH];
     int val;
 } Node;
 
 
-int compar( void *a, void *b )
+static int compar( void *a, void *b )
 {
     Node n1 = *(Node*)a;
     Node n2 = *(Node*)b;
@@ -364,15 +351,13 @@ int compar( void *a, void *b )
     return n1.val - n2.val;
 }
 
-int compar_max( void *a, void *b )
+static int compar_max( void *a, void *b )
 {
     Node n1 = *(Node*)a;
     Node n2 = *(Node*)b;
 
     return n2.val - n1.val;
 }
-
-
 
 
 void g_dijkstra(Graph *graph, const char *start)
@@ -385,23 +370,15 @@ void g_dijkstra(Graph *graph, const char *start)
         ht_insert(sure, it.ht_item->key, copy_int(0));
     }
 
-    // dist[ST] = 1;
     ht_insert( dist, start, copy_int(1) );
 
-    /*
-    priority_queue< nodS, vector< nodS >, comparC > qu;
-    nodS STnod = { ST, dist[ST] };
-    qu.push( STnod );
-     */
+
     Heap *qu = h_create( graph->nodes * 2, compar);
     Node *STnod = malloc(sizeof(Node)); strcpy( STnod->nod, start ); STnod->val = 1;
     h_push(qu, STnod);
 
     for( int snr = 0; snr < graph->nodes - 1; ++snr )
     {
-
-        //while( qu.size() && ( dist[qu.top().nod] != qu.top().val || sure[qu.top().nod] ) )
-          //  qu.pop();
         while( qu->size && (*(int*)( ht_get(dist, (*(Node*)h_getmin(qu)).nod )) != (*(Node*)h_getmin(qu)).val || (*(int*)ht_get(sure, (*(Node*)h_getmin(qu)).nod ) ) ) )
             h_pop(qu);
 

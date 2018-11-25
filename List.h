@@ -26,26 +26,19 @@ typedef struct List
 
 List *l_create(void (*f)(void *));
 
-void l_insert_after(List *list, L_item *it, void *var);
-
-void l_insert_before(List *list, L_item *it, void *var);
-
 bool l_is_empty(List *list);
 
-void l_first(List *list, void *var);
+void l_insert_after(List *list, L_item *it, void *var);
+void l_insert_before(List *list, L_item *it, void *var);
 
 void l_push_back(List *list, void *var);
-
 void l_push_front(List *list, void *var);
 
+void l_pop_front(List *list);
+void l_pop_back(List *list);
 void l_delete(List *list, L_item *it);
 
-void l_pop_front(List *list);
-
-void l_pop_back(List *list);
-
 void l_clear(List *list);
-
 void l_free(void *list);
 
 #endif //PROGNHF_LIST_H

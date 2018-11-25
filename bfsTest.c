@@ -65,14 +65,13 @@ int main()
         l_pop_front(q);
         for(L_item *it = ((List *) ht_get(graph, nod))->front; it != NULL; it = it->next)
         {
-            char *nnod = copy_string(it->value);
+            char *nnod = it->value;
             if(ht_get(bfs, nnod) == NULL)
             {
                 ht_insert(bfs, nnod, copy_int(*(int *) ht_get(bfs, nod) + 1));
 
                 l_push_back(q, copy_string(nnod));
             }
-            free(nnod);
         }
         free(nod);
     }

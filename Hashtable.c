@@ -7,6 +7,7 @@
 #include "debugmalloc/debugmalloc.h"
 //*/
 
+#include <limits.h>
 #include "Hashtable.h"
 
 
@@ -27,15 +28,13 @@ static Hashtable *ht_create_size(void (*f)(void *), int size)
         ht->vector[i] = l_create(free);
     return ht;
 }
-//*/
+
 Hashtable *ht_create(void (*f)(void *))
 {
     return  ht_create_size(f, INITIAL_SIZE);
 }
-//*/
 
-
-// ezt a függvényt innen szereztem: https://github.com/jamesroutley/write-a-hash-table
+// source for this function: https://github.com/jamesroutley/write-a-hash-table
 static long long hash_func(const char *key, const int a, const int mod)
 {
     long long hash = 0;
@@ -48,6 +47,24 @@ static long long hash_func(const char *key, const int a, const int mod)
     return hash;
 }
 
+void ht_insert(Hashtable *ht, const char *key, void *value)
+{
+    int hash = hash_func(key, PRIME1, ht->size);
+    Ht_item *new = malloc(sizeof(Ht_item));
+    new->key = malloc(strlen(key) + 1);
+    strcpy(new->key, key);
+    new->value = value;
+
+    if(ht_get(ht, key) != NULL)
+        ht_delete(ht, key);
+
+    l_push_back(ht->vector[hash], new);
+    ++ht->count;
+
+    if( ht->count >= ht->size )
+        ht_resize(ht, ht->size * 2);
+}
+
 void ht_delete(Hashtable *ht, const char *key)
 {
     int hash = hash_func(key, PRIME1, ht->size);
@@ -57,9 +74,7 @@ void ht_delete(Hashtable *ht, const char *key)
     {
         if(strcmp(((Ht_item *) it->value)->key, key) == 0)
         {
-            /// [TODO] free ht_item allocated memory!!!
             free(((Ht_item *) it->value)->key);
-            //free(((Ht_item *) it->value)->value);
             ht->free_item(((Ht_item *) it->value)->value);
 
             // delete:
@@ -78,7 +93,6 @@ void *ht_get(Hashtable *ht, const char *key)
 {
     int hash = hash_func(key, PRIME1, ht->size);
 
-
     L_item *it = ht->vector[hash]->front;
     for(; it != NULL; it = it->next)
     {
@@ -86,29 +100,6 @@ void *ht_get(Hashtable *ht, const char *key)
             return ((Ht_item *) it->value)->value;
     }
     return NULL;
-}
-
-void ht_insert(Hashtable *ht, const char *key, void *value)
-{
-    int hash = hash_func(key, PRIME1, ht->size);
-    Ht_item *new = malloc(sizeof(Ht_item));
-    new->key = malloc(strlen(key) + 1);
-    strcpy(new->key, key);
-    new->value = value;
-
-    if(ht_get(ht, key) != NULL)
-        ht_delete(ht, key);
-
-    l_push_back(ht->vector[hash], new);
-    ++ht->count;
-
-    //*/
-    if( ht->count >= ht->size )
-    {
-        ht_resize(ht, ht->size * 2);
-    }
-    //*/
-
 }
 
 void ht_clear(Hashtable *ht)
@@ -128,6 +119,26 @@ void ht_free(Hashtable *ht)
         l_free(ht->vector[i]);
     free(ht->vector);
     free(ht);
+}
+
+void ht_resize( Hashtable *ht, int size )
+{
+    Hashtable *ht_new = ht_create_size(ht->free_item, size);
+    for(Ht_iterator it = ht_begin(ht); it.ht_item != NULL; it = ht_next(ht, it))
+    {
+        ht_insert(ht_new, it.ht_item->key, it.ht_item->value );
+        free( it.ht_item->key );
+    }
+
+    for( int i = 0; i < ht->size; ++i )
+        l_free(ht->vector[i] );
+    free( ht->vector );
+
+    ht->count = ht_new->count;
+    ht->size = ht_new->size;
+    ht->vector = ht_new->vector;
+
+    free( ht_new );
 }
 
 Ht_iterator ht_begin(Hashtable *ht)
@@ -170,28 +181,3 @@ Ht_iterator ht_next(Hashtable *ht, Ht_iterator it)
     it.ht_item = NULL;
     return it;
 }
-//*/
-void ht_resize( Hashtable *ht, int size )
-{
-    Hashtable *ht_new = ht_create_size(ht->free_item, size);
-    for(Ht_iterator it = ht_begin(ht); it.ht_item != NULL; it = ht_next(ht, it))
-    {
-        ht_insert(ht_new, it.ht_item->key, it.ht_item->value );
-
-        free( it.ht_item->key );
-    }
-
-
-    for( int i = 0; i < ht->size; ++i )
-        l_free(ht->vector[i] );
-
-    free( ht->vector );
-
-
-    ht->count = ht_new->count;
-    ht->size = ht_new->size;
-    ht->vector = ht_new->vector;
-
-    free( ht_new );
-
-}//*/

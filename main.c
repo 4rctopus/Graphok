@@ -18,13 +18,13 @@ int main()
 {
     Graph *graph = g_create();
 
-    char inp[51] = "";
+    char inp[NODE_LENGTH] = "";
     while(strcmp(inp, "exit") != 0)
     {
         scanf("%s", inp);
         if(strcmp(inp, "add_edge") == 0)
         {
-            char from[51], to[51];
+            char from[NODE_LENGTH], to[NODE_LENGTH];
             int w = 1;
             if(graph->weighted)
                 scanf("%s %s %d", from, to, &w);
@@ -41,55 +41,55 @@ int main()
         }
         else if(strcmp(inp, "remove_edge") == 0)
         {
-            char from[51], to[51];
+            char from[NODE_LENGTH], to[NODE_LENGTH];
             scanf("%s %s", from, to);
             g_remove_edge(graph, from, to);
         }
         else if(strcmp(inp, "remove_node") == 0)
         {
-            char nod[51];
+            char nod[NODE_LENGTH];
             scanf("%s", nod);
             g_remove_node(graph, nod);
         }
         else if(strcmp(inp, "add_node") == 0)
         {
-            char nod[51];
+            char nod[NODE_LENGTH];
             scanf("%s", nod);
             g_add_node(graph, nod);
         }
         else if(strcmp(inp, "bfs") == 0)
         {
-            char nod[51];
+            char nod[NODE_LENGTH];
             scanf("%s", nod);
             g_bfs(graph, nod);
         }
         else if(strcmp(inp, "dfs") == 0)
         {
-            char nod[51];
+            char nod[NODE_LENGTH];
             scanf("%s", nod);
             g_dfs(graph, nod);
         }
         else if( strcmp(inp, "bell") == 0 )
         {
-            char nod[51];
+            char nod[NODE_LENGTH];
             scanf("%s", nod);
             g_bellman_ford(graph, nod);
         }
         else if( strcmp( inp, "dijk") == 0 )
         {
-            char nod[51];
+            char nod[NODE_LENGTH];
             scanf("%s", nod);
             g_dijkstra(graph, nod);
         }
         else if( strcmp( inp, "mst") == 0 )
         {
-            char minmax[51];
+            char minmax[NODE_LENGTH];
             scanf("%s", minmax);
             g_mst(graph, minmax);
         }
         else if(strcmp(inp, "load") == 0)
         {
-            char file[51];
+            char file[NODE_LENGTH];
             scanf("%s", file);
 
             printf("Do you wish to proceed, if you do, your current graph will be lost? (Y/N)\n");
@@ -108,7 +108,7 @@ int main()
         }
         else if( strcmp(inp, "save") == 0 )
         {
-            char file[51];
+            char file[NODE_LENGTH];
             scanf("%s", file);
 
             if( g_save(graph, file) )

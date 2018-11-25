@@ -10,11 +10,8 @@
 #include "debugmalloc/debugmalloc.h"
 //*/
 
-#include <stdio.h>
 
 #include "Heap.h"
-
-
 
 
 static int parent(int i){return (i - 1) / 2;}
@@ -27,6 +24,19 @@ void swap( void **x, void **y )
     *x = *y;
     *y = emp;
 }
+
+Heap *h_create(int capacity, int (*compare)(void *, void *))
+{
+    Heap *heap = malloc(sizeof(Heap));
+    heap->capacity = capacity;
+    heap->compare = compare;
+    heap->vector = malloc(sizeof(void*) * capacity);
+
+    heap->size = 0;
+
+    return heap;
+}
+
 
 void h_push(Heap *heap, void *item )
 {
@@ -85,17 +95,6 @@ void *h_getmin(Heap *heap)
     return heap->vector[0];
 }
 
-Heap *h_create(int capacity, int (*compare)(void *, void *))
-{
-    Heap *heap = malloc(sizeof(Heap));
-    heap->capacity = capacity;
-    heap->compare = compare;
-    heap->vector = malloc(sizeof(void*) * capacity);
-
-    heap->size = 0;
-
-    return heap;
-}
 
 void h_clear( Heap *heap )
 {
