@@ -507,6 +507,9 @@ void g_mst(Graph *graph, const char *minmax )
 
     g_display(mst);
     g_free(mst);
+
+    ht_free(sure);
+    h_free(qu);
 }
 
 
