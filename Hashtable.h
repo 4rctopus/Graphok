@@ -39,6 +39,8 @@ void ht_delete(Hashtable *ht, const char *key);
 
 void *ht_get(Hashtable *ht, const char *key);
 
+void ht_resize(Hashtable *ht, int size );
+
 void ht_insert(Hashtable *ht, const char *key, void *value);
 
 void ht_clear(Hashtable *ht);

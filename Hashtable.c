@@ -13,19 +13,27 @@
 const int PRIME1 = 151;
 
 //const int INITIAL_SIZE = 104281;
-const int INITIAL_SIZE = 15;
+const int INITIAL_SIZE = 2;
 
 
-Hashtable *ht_create(void (*f)(void *))
+static Hashtable *ht_create_size(void (*f)(void *), int size)
 {
     Hashtable *ht = (Hashtable *) malloc(sizeof(Hashtable));
-    ht->vector = malloc(INITIAL_SIZE * sizeof(List));
-    ht->size = INITIAL_SIZE;
+    ht->vector = malloc(size * sizeof(List));
+    ht->size = size;
+    ht->count = 0;
     ht->free_item = f;
     for(int i = 0; i < ht->size; ++i)
         ht->vector[i] = l_create(free);
     return ht;
 }
+//*/
+Hashtable *ht_create(void (*f)(void *))
+{
+    return  ht_create_size(f, INITIAL_SIZE);
+}
+//*/
+
 
 // ezt a függvényt innen szereztem: https://github.com/jamesroutley/write-a-hash-table
 static long long hash_func(const char *key, const int a, const int mod)
@@ -57,9 +65,13 @@ void ht_delete(Hashtable *ht, const char *key)
             // delete:
             l_delete(ht->vector[hash], it);
             --ht->count;
-            return;
+            break;
         }
     }
+
+    if( ht->count >= ht->size )
+        ht_resize(ht, ht->size / 2);
+
 }
 
 void *ht_get(Hashtable *ht, const char *key)
@@ -89,6 +101,14 @@ void ht_insert(Hashtable *ht, const char *key, void *value)
 
     l_push_back(ht->vector[hash], new);
     ++ht->count;
+
+    //*/
+    if( ht->count >= ht->size )
+    {
+        ht_resize(ht, ht->size * 2);
+    }
+    //*/
+
 }
 
 void ht_clear(Hashtable *ht)
@@ -112,7 +132,7 @@ void ht_free(Hashtable *ht)
 
 Ht_iterator ht_begin(Hashtable *ht)
 {
-    Ht_iterator it = {0, NULL, NULL};// = malloc(sizeof(Ht_iterator));
+    Ht_iterator it = {0, NULL, NULL};
 
     for(int i = 0; i < ht->size; ++i)
         if(!l_is_empty(ht->vector[i]))
@@ -150,3 +170,28 @@ Ht_iterator ht_next(Hashtable *ht, Ht_iterator it)
     it.ht_item = NULL;
     return it;
 }
+//*/
+void ht_resize( Hashtable *ht, int size )
+{
+    Hashtable *ht_new = ht_create_size(ht->free_item, size);
+    for(Ht_iterator it = ht_begin(ht); it.ht_item != NULL; it = ht_next(ht, it))
+    {
+        ht_insert(ht_new, it.ht_item->key, it.ht_item->value );
+
+        free( it.ht_item->key );
+    }
+
+
+    for( int i = 0; i < ht->size; ++i )
+        l_free(ht->vector[i] );
+
+    free( ht->vector );
+
+
+    ht->count = ht_new->count;
+    ht->size = ht_new->size;
+    ht->vector = ht_new->vector;
+
+    free( ht_new );
+
+}//*/
