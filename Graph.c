@@ -57,6 +57,18 @@ void g_display(Graph *graph)
     }
 }
 
+void g_display_edges(Graph *graph)
+{
+    for(Ht_iterator it = ht_begin(graph->graph); it.ht_item != NULL; it = ht_next(graph->graph, it))
+    {
+        for(L_item *it2 = ((List *) it.ht_item->value)->front; it2 != NULL; it2 = it2->next)
+        {
+            printf("%s ", it.ht_item->key);
+            printf("%s %d\n", ((Edge *) it2->value)->node, ((Edge *) it2->value)->weigth);
+        }
+    }
+}
+
 void g_remove_edge(Graph *graph, const char *from, const char *to)
 {
     List *from_nod = ht_get(graph->graph, from);
@@ -218,6 +230,9 @@ void g_display_properties(Graph *graph)
 
 static void g_gfs(Graph *graph, const char *start, void (*push_f)(List *, void *))
 {
+    if( ht_get(graph->graph, start) == NULL )
+        return;
+
     Hashtable *bfs = ht_create(free);
 
     List *q = l_create(free);
@@ -264,6 +279,9 @@ void g_dfs(Graph *graph, const char *start)
 
 void g_bellman_ford(Graph *graph, const char *start)
 {
+    if( ht_get(graph->graph, start) == NULL )
+        return;
+
     // distance from start point
     Hashtable *dist = ht_create(free);
 
@@ -362,6 +380,9 @@ static int compar_max( void *a, void *b )
 
 void g_dijkstra(Graph *graph, const char *start)
 {
+    if( ht_get(graph->graph, start) == NULL )
+        return;
+
     Hashtable *dist = ht_create(free);
     Hashtable *sure = ht_create(free);
     for(Ht_iterator it = ht_begin(graph->graph); it.ht_item != NULL; it = ht_next(graph->graph, it))
@@ -488,6 +509,8 @@ void g_mst(Graph *graph, const char *minmax )
     ht_free(sure);
     h_free(qu);
 }
+
+
 
 
 

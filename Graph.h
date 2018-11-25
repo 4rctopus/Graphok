@@ -31,6 +31,7 @@ void g_remove_node(Graph *graph, const char *nod);
 void g_remove_edge(Graph *graph, const char *from, const char *to);
 
 void g_display(Graph *graph);
+void g_display_edges(Graph *graph);
 void g_display_properties(Graph *graph);
 
 void g_bfs(Graph *graph, const char *start);

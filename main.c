@@ -36,9 +36,9 @@ int main()
                 g_add_edge(graph, to, from, w);
         }
         else if(strcmp(inp, "display") == 0)
-        {
+            g_display_edges(graph);
+        else if( strcmp(inp,"list") == 0 )
             g_display(graph);
-        }
         else if(strcmp(inp, "remove_edge") == 0)
         {
             char from[NODE_LENGTH], to[NODE_LENGTH];
@@ -69,13 +69,13 @@ int main()
             scanf("%s", nod);
             g_dfs(graph, nod);
         }
-        else if( strcmp(inp, "bell") == 0 )
+        else if( strcmp(inp, "bell") == 0 || strcmp(inp, "bellman_ford") == 0 )
         {
             char nod[NODE_LENGTH];
             scanf("%s", nod);
             g_bellman_ford(graph, nod);
         }
-        else if( strcmp( inp, "dijk") == 0 )
+        else if( strcmp( inp, "dijk") == 0 || strcmp(inp, "dijkstra") == 0 )
         {
             char nod[NODE_LENGTH];
             scanf("%s", nod);
@@ -124,7 +124,7 @@ int main()
             graph->directed = true;
         else if(strcmp(inp, "-d") == 0)
             graph->directed = false;
-        else if(strcmp(inp, "prop") == 0)
+        else if(strcmp(inp, "prop") == 0 || strcmp(inp, "properties") == 0 )
             g_display_properties(graph);
         else if(strcmp(inp, "exit") != 0)
             printf("\'%s\' is not recognized as a command.\n", inp);
